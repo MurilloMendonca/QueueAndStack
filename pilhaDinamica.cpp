@@ -26,20 +26,24 @@ struct Pilha
 {
 private:
     No<T> *Topo;
+    int tam;
 
 public:
     Pilha(){
         Topo=NULL;
+        tam=0;
     }
     void Empilha(T element)
     {
         No<T> *Aux = new No<T>(element, this->Topo);
         this->Topo = Aux;
+        tam++;
     }
     void Empilha(No<T> Novo)
     {
         Novo->Lig=Topo;
         Topo = Novo;
+        tam++;
     }
     bool Desempilha(T &Elemento)
     {
@@ -49,6 +53,7 @@ public:
         No<T> *Aux = Topo;
         Topo = Topo->Lig;
         delete Aux;
+        tam--;
         return true;
     }
     bool Desempilha()
@@ -58,9 +63,9 @@ public:
         No<T> *Aux = Topo;
         Topo = Topo->Lig;
         delete Aux;
+        tam--;
         return true;
     }
-
     No<T> TopoPilha()
     {
         return *Topo;
@@ -80,34 +85,57 @@ public:
         this->Topo=aux->Topo;
         delete aux;
     }
-    void InverteComFila()
-    {
-        Fila<T>* aux = new Fila<T>;
-        T NoAux;
-        while(this->Desempilha(NoAux))
+    void Ordena(){
+        Pilha<T>* aux = new Pilha<T>;
+        T auxT;
+        T menor = this->TopoPilha().Chave;
+        int tam = this->tam;
+        for(int i=tam; i>0;i--)
         {
-            aux->Insere(NoAux);
+            menor=this->TopoPilha().Chave;
+            for(int j=0;j<i;j++)
+            {
+                this->Desempilha(auxT);
+                if(auxT<menor) menor=auxT;
+                aux->Empilha(auxT);
+            }
+            for(int j=0;j<i;j++)
+            {
+                aux->Desempilha(auxT);
+                if(auxT!=menor)
+                    this->Empilha(auxT);
+            }
+            aux->Empilha(menor);
         }
-        while(aux->Remove(NoAux))
+        for(int i=0; i<tam;i++)
         {
-            this->Empilha(NoAux);
+            aux->Desempilha(auxT);
+            this->Empilha(auxT);
         }
-        delete aux;
     }
-
+    void Mostra()
+    {
+        No<T>* aux=this->Topo;
+        while (aux!=NULL)
+        {
+            cout<<aux->Chave<<"->";
+            aux=aux->Lig;
+        }
+        cout<<"NULL\n";
+    }
 };
 
 int main()
 {
     Pilha<char> P;
     P.Empilha('a');
-    cout<<P.TopoPilha().Chave;
+    P.Empilha('z');
+    P.Empilha('v');
     P.Empilha('b');
-    cout<<P.TopoPilha().Chave;
-    P.Inverte();
-    cout<<P.TopoPilha().Chave;
-    P.Desempilha();
-    cout<<P.TopoPilha().Chave;
+    P.Mostra();
+    P.Ordena();
+    P.Mostra();
+
 
 
     return 0;

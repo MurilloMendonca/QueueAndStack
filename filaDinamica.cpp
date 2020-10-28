@@ -1,6 +1,5 @@
 #include <iostream>
 #include <random>
-#include <chrono>
 #include<unistd.h>
 using namespace std;
 template <typename T>
@@ -139,9 +138,7 @@ public:
         cout<<"NULL\n";
     }
 };
-
-int main(){
-    /*Fila<char> P;
+/*Fila<char> P;
     P.Insere('b');
     P.Insere('a');
     P.Insere('d');
@@ -152,12 +149,14 @@ int main(){
     P.Mostra();
     P.Retira();
     P.Mostra();*/
-
-    random_device rd;                      
-    mt19937 gen (rd());
-    uniform_int_distribution<int> prob(1, 4);
-    uniform_int_distribution<int> probChegada(1, 4);
-    int chegada = probChegada(gen);
+int main(){
+    //Precisa de biblioteca random
+    random_device rd;                                       //Distribuicao uniforme de probabilidade
+    mt19937 gen (rd());                                     //para gerar os tempos aleatorios
+    uniform_int_distribution<int> tempoDeAtendimento(1, 4); //de atendimento
+    uniform_int_distribution<int> tempoDeChegada(1, 3);     //e de chegada do proximo cliente
+    
+    int chegada = tempoDeChegada(gen);
     Fila<int> fila;
     int cliente =1;
     int atendendo=0;
@@ -167,43 +166,46 @@ int main(){
     {
         system("clear");
         printf("Minuto: %i", minuto);
-        printf("\natenditempo: %i", atendTempo);
+        printf("\nTempo de atendimento restante: %i", atendTempo);
         printf("\nProxima chegada: %i", chegada);
-        atendTempo--;
-        if(atendTempo<0)
+        if(atendendo!=0)atendTempo--;                       //Se esta atendendo->subtrai o tempo de atendimento
+        if(atendTempo<0)                                    //Se acabou o tempo para aquele atendimento
         {
-            atendendo=0;
-            if(fila.getTam()==0)
+            atendendo=0;                                    //Libera o caixa
+            if(fila.getTam()==0)                            //Se não tiver ninguem na fila
                 printf("\nAguardando proximo cliente...");
-            else
+            else                                            //Se tiver alguem na fila
             {
-                atendendo=fila.FrenteFila().Chave;              //Atualiza qual cliente esta sendo atendido
-                fila.Retira();
-                atendTempo=prob(gen);           //Gera tempo de atendimento aleatorio para este cliente
+                atendendo=fila.FrenteFila().Chave;          //Atualiza qual cliente esta sendo atendido
+                fila.Retira();                              //Tira da fila
+                atendTempo=tempoDeAtendimento(gen);         //Gera tempo de atendimento aleatorio para este cliente
 
             }
         }
         printf("\nAtendendo cliente %i", atendendo);
 
-        if(minuto==chegada){
+        if(minuto==chegada){                    //Se alguem chegou
             if(atendendo==0)                    //Se esta livre
             {
                 atendendo=cliente;              //Atualiza qual cliente esta sendo atendido
-                atendTempo=prob(gen);           //Gera tempo de atendimento aleatorio para este cliente
-                chegada=probChegada(gen)+minuto;       //Gera tempo de chegada do proximo
+                atendTempo=tempoDeAtendimento(gen);           //Gera tempo de atendimento aleatorio para este cliente
+                chegada=tempoDeChegada(gen)+minuto;//Gera tempo de chegada do proximo
                 cliente++;                      //Atualiza numero do cliente
             }
-            else
+            else                                //Se não esta livre
             {
-                fila.Insere(cliente);
-                cliente++;
-                chegada=probChegada(gen)+minuto;
+                fila.Insere(cliente);           //Entra na fila
+                cliente++;                      //atualiza o numero do cliente
+                chegada=tempoDeChegada(gen)+minuto;//Gera tempo de chegada do proximo
             }
         }
         printf("\nFila: ");
         fila.Mostra();
-        //sleep(2);
-        if(fila.getTam()>filaMax) filaMax=fila.getTam();
+
+        //Precisa da biblioteca do SO, windows.h ou unistd.h
+        //sleep(2);             //sleep para poder acompalhar a entrada e saida de cada cliente
+
+        if(fila.getTam()>filaMax) filaMax=fila.getTam();//Atualiza maior fila
     }
     printf("Tamanho maximo de fila: %i", filaMax);                  
     return 0;
